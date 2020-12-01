@@ -3,11 +3,8 @@ import random
 import time
 numberOfCoin = 10
 gameRunning = True
-computer1 = mp.Player()
-computer1.bulidTable(10, 3)
-computer2 = mp.Player()
-computer2.bulidTable(10, 3)
-occassionalFeedBack = 0
+computer1 = mp.Player(row=10, column=3)
+computer2 = mp.Player(row=10, column=3)
 p1Win = 0
 p2Win = 0
 totalGames = 0
@@ -16,33 +13,29 @@ p1Start = 0
 p2Start = 0
 
 
-def newResult(pick=0, role=""):
-    global numberOfCoin, occassionalFeedBack
-    occassionalFeedBack = 0
-    if role == "machine":
-        if pick > numberOfCoin:
-            # print("Insufficient coins.... " + str(numberOfCoin) + " left")
-            occassionalFeedBack = -2
-            return
+def newResult(pick=0, role="", p1=""):
+    global numberOfCoin
+    if role == "machine" and pick > numberOfCoin:
+        # print("Insufficient coins.... " + str(numberOfCoin) + " left")
+        return False
     numberOfCoin -= pick
-    if role == "human":
+    if p1 == "human":
         print("\t\t\t\t"+("● " * numberOfCoin))
-    return
+    return True
 
 
 def player1MakeMove(role="machine"):
-    global computer1, computer2, p2Win, totalGames, gameRunning, numberOfCoin
+    global computer1, numberOfCoin
     if role == "machine":
         player1_pick = computer1.makeMove(numberOfCoin)[0]
         # print("\nPlayer1 picks: " + str(player1_pick) + " coins")
         # print(computer1.table)
-        newResult(pick=player1_pick, role="machine")
-        while occassionalFeedBack == -2:
-            player1_pick_again = computer1.receiveFeedback(occassionalFeedBack)[
-                0]
+        sufficient = newResult(pick=player1_pick, role=role, p1=role)
+        while not sufficient:
+            player1_pick_again = computer1.receiveFeedback(-2)[0]
             # print("\nPlayer1 REpicks: " + str(player1_pick_again) + " coins")
             # print(computer1.table)
-            newResult(pick=player1_pick_again, role="machine")
+            sufficient = newResult(pick=player1_pick_again, role=role, p1=role)
     elif role == "human":
         isDigit = False
         while not isDigit:
@@ -56,24 +49,25 @@ def player1MakeMove(role="machine"):
                 print("You should pick 1~"+str(min(3, numberOfCoin))+" coin(s)")
                 isDigit = False
         print("\nPlayer1 picks: " + str(player1_pick) + " coins")
-        newResult(pick=player1_pick, role="human")
+        newResult(pick=player1_pick, role=role, p1=role)
 
 
 def player2MakeMove(opponent=""):
-    global computer1, computer2, p2Win, totalGames, gameRunning, numberOfCoin
+    global computer2, numberOfCoin
     player2_pick = computer2.makeMove(numberOfCoin)[0]
     if opponent == "human":
         time.sleep(1)
         print("\n\t\t\t\t\t\t\t\t\tPlayer2 picks: " +
               str(player2_pick) + " coins")
     # print(computer2.table)
-    newResult(pick=player2_pick, role="machine")
-    while occassionalFeedBack == -2:
-        player2_pick_again = computer2.receiveFeedback(occassionalFeedBack)[0]
+    sufficient = newResult(pick=player2_pick, role="machine", p1=opponent)
+    while not sufficient:
+        player2_pick_again = computer2.receiveFeedback(-2)[0]
         # print("\n\t\t\t\t\t\t\t\t\tPlayer2 REpicks: " +
         #       str(player2_pick_again) + " coins")
         # print(computer2.table)
-        newResult(pick=player2_pick_again, role="machine")
+        sufficient = newResult(pick=player2_pick_again,
+                               role="machine", p1=opponent)
 
 
 def judge(lastMover, p1="machine"):
@@ -107,7 +101,7 @@ def judge(lastMover, p1="machine"):
             # print(computer2.table)
         gameRunning = False
         totalGames += 1
-    mover = -1*lastMover+3  # input 2, output1; input 1, output 2
+    mover = -1 * lastMover + 3  # input 2 -> output1; input 1 -> output 2
 
 
 def newGame(p1):
@@ -131,7 +125,7 @@ def play(trainTimes, p1=""):
             player1MakeMove(role=p1)
             judge(lastMover=mover, p1=p1)
             if totalGames == trainTimes:
-                break
+                return
             if not gameRunning:
                 newGame(p1=p1)
                 if mover == 1:
@@ -139,7 +133,7 @@ def play(trainTimes, p1=""):
         player2MakeMove(opponent=p1)
         judge(lastMover=mover, p1=p1)
         if totalGames == trainTimes:
-            break
+            return
         if not gameRunning:
             newGame(p1=p1)
 
@@ -153,19 +147,12 @@ def printTrainResult():
     print("Game start with P1: "+str(p1Start)+" / P2: "+str(p2Start))
     print("P1 winning rate: " + str(p1Win/totalGames*100) + "%")
     print("P2 winning rate: " + str(p2Win/totalGames*100) + "%")
+    print(computer1.table)
+    print(computer2.table)
 
 
-# def stealBetterTable():
-#     global p1Win, p2Win, totalGames, computer1, computer2
-#     # print(computer1.table)
-#     # print(computer2.table)
-#     if p1Win/totalGames*100 > p2Win/totalGames*100:
-#         computer2.table = computer1.table
-
-
-train(10000)
+train(1000)
 printTrainResult()
-# stealBetterTable()
 
-# totalGames = 0
-# play(trainTimes=1, p1="human")
+totalGames = 0
+play(trainTimes=1, p1="human")
