@@ -71,7 +71,10 @@ def player2MakeMove(opponent=""):
 
 
 def judge(lastMover, p1="machine"):
-    global computer1, computer2, p1Win, p2Win, totalGames, gameRunning, numberOfCoin, mover
+    global computer1, computer2,\
+        p1Win, p2Win,\
+        totalGames, gameRunning,\
+        numberOfCoin, mover
     if numberOfCoin == 0:
         if p1 == "machine":
             if lastMover == 1:
@@ -119,6 +122,7 @@ def newGame(p1):
 
 def play(trainTimes, p1=""):
     global gameRunning, mover, totalGames
+    totalGames = 0
     newGame(p1=p1)
     while gameRunning:
         if mover == 1:
@@ -153,6 +157,4 @@ def printTrainResult():
 
 train(1000)
 printTrainResult()
-
-totalGames = 0
 play(trainTimes=1, p1="human")

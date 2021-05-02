@@ -30,48 +30,52 @@ class Player():
             self.path.pop()
             return self.makeMove(lastPlace)
 
-    ####################################################################################
+    ##############################################################################
     # Key Logic Here!
     def givePoints(self, theRestCoin, reverse=False):
-        def calculatePoint(theRestCoin, take_i, choices):
-            point = 1
+        def calculatePoint(theRestCoin, take_i):
             zero = np.array([0, 0, 0])
-            if theRestCoin-1-(take_i+1) >= 0:
-                target = self.table[theRestCoin-1-(take_i+1)::-1][:choices]
+            restCoinAfterYouTakeI = theRestCoin - take_i
+            # If your opponent then take 1, the next time you will have restCoinAfterYouTakeI-1 conis rest.
+            # If your opponent then take 2, the next time you will have restCoinAfterYouTakeI-2 conis rest.
+            # If your opponent then take n, the next time you will have restCoinAfterYouTakeI-n conis rest.
+            if (restCoinAfterYouTakeI-1)-1 >= 0:
+                target = self.table[(restCoinAfterYouTakeI-1)-1::-1][:]
+                target = target[:3]
+                # If there exists any row that all numbers are negative,
+                # it means that "take i" now will lead you to failure
+                # because your opponent is smart enough to push you to that situation.
                 for each in target:
-                    # If there exists any row that all member in taht row are negative,
-                    # it means that this choice will lead you to failure.
                     if (each < zero).all():
-                        # point = -10   # How about sum up or choose minimum?
-                        return target.min()*self.discountRate
+                        return each.max() * self.discountRate
 
-                # If there exists any row that all member in taht row are zeros
-                # (and meanwhile no row is all-negative,) it means that this choice
-                # will lead you to an unknown area.
+                # If there exists any row that all numbers are zero
+                # (and no row is all-negative) it means that this choice
+                # will lead you to an unknown result.
                 for each in target:
                     if (each == zero).all():
-                        point = 0
-                        return point
-                return target.max()*self.discountRate
+                        return 0
+
+                return target.max() * self.discountRate
             else:
-                point = 0
-                return point
+                return 0
         plusOrMinus = -1 if reverse else 1
         for i in range(1, 4):
             if i <= theRestCoin:
                 # Q <- Q + lr*point
-                self.table[theRestCoin-1][i-1] += self.learningRate * calculatePoint(
-                    theRestCoin=theRestCoin, take_i=i, choices=3) * plusOrMinus
-    ##################################################################################
+                self.table[theRestCoin-1][i-1] += self.learningRate *\
+                    calculatePoint(theRestCoin=theRestCoin, take_i=i) *\
+                    plusOrMinus
+    ###############################################################################
 
     def makeMove(self, theRestCoin):
-        # If an invalid move has been made (and has been discovered later on,)
+        # If you made an invalid move, and has been notified by the judge,
         # a deduction of the values in each blank is needed.
-        # But when the largest number you can choose is less than 4,
-        # this kind of situation can actually be ignored.
+        # However, if the max number of coins you can pick < 4,
+        # the situation described above can actually be ignored.
         self.givePoints(theRestCoin)
         max_val = self.table[theRestCoin-1][0]
-        take_i = 1
+        take_i = 0
         thisRow = self.table[theRestCoin-1][:]
         if np.all(thisRow == thisRow[0]) and thisRow[0] == 0:
             # print(thisRow)
@@ -79,7 +83,7 @@ class Player():
             # take_i = random.randint(1,min(3,theRestCoin))
         else:
             for i in range(1, 4):
-                if thisRow[i-1] > max_val:
+                if thisRow[i-1] >= max_val:
                     max_val = thisRow[i-1]
                     take_i = i
         self.pathAppend(theRestCoin=theRestCoin, take_i=take_i)
