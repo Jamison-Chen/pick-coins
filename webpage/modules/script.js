@@ -1,7 +1,11 @@
 import { MachinePlayer } from "./machinePlayer.js";
+const restartBtn = document.getElementById("restart-btn");
 const startBtn = document.getElementById("start-btn");
 const trainBtn = document.getElementById("train-btn");
 const choiceField = document.getElementById("choice-field");
+const coinDesk = document.getElementById("coin-desk");
+const opponentChoiceMsg = document.getElementById("opponent-choice-msg");
+const myChoiceMsg = document.getElementById("my-choice-msg");
 let computer1;
 let computer2;
 let gameOver;
@@ -13,7 +17,7 @@ let gameStartWithP2;
 let totalGame;
 let p1WinTime;
 let p2WinTime;
-function setupNewGame(isTraining) {
+function setupNewGame() {
     gameOver = false;
     numOfCoin = 10;
     // randomly decide the first mover
@@ -24,9 +28,6 @@ function setupNewGame(isTraining) {
     else {
         mover = 2;
         gameStartWithP2++;
-    }
-    if (!isTraining) {
-        console.log(Array(numOfCoin + 1).join("● "));
     }
 }
 function makeMove(mp, opponent) {
@@ -39,36 +40,47 @@ function makeMove(mp, opponent) {
     }
     numOfCoin -= numTook;
     if (opponent == "human") {
-        console.log(`Machine picked ${numTook}`);
-        console.log(Array(numOfCoin + 1).join("● "));
+        if (coinDesk != null && opponentChoiceMsg != null) {
+            for (let i = 0; i < numTook; i++) {
+                const movedCoin = coinDesk.childNodes[0];
+                if (movedCoin instanceof HTMLElement) {
+                    coinDesk.removeChild(movedCoin);
+                }
+            }
+            const msgDiv = document.createElement("div");
+            msgDiv.innerHTML = `Computer picked ${numTook}`;
+            opponentChoiceMsg.appendChild(msgDiv);
+        }
     }
 }
 function judge(roles) {
     if (numOfCoin == 0) {
         if (mover == 1) {
             p2WinTime++;
-            if (roles[0] instanceof MachinePlayer) {
-                roles[0].receiveFeedback(-1);
-                roles[0].refreshPath();
-            }
-            if (roles[1] instanceof MachinePlayer) {
-                roles[1].receiveFeedback(1);
-                roles[1].refreshPath();
-            }
         }
         else {
             p1WinTime++;
-            if (roles[0] instanceof MachinePlayer) {
-                roles[0].receiveFeedback(1);
-                roles[0].refreshPath();
-            }
-            if (roles[1] instanceof MachinePlayer) {
-                roles[1].receiveFeedback(-1);
-                roles[1].refreshPath();
-            }
+        }
+        let loser = roles[mover - 1];
+        // -1 * mover + 2 => input 1 output 1, input 2 output 0
+        let winner = roles[-1 * mover + 2];
+        if (loser instanceof MachinePlayer) {
+            loser.receiveFeedback(-1);
+            loser.refreshPath();
+        }
+        if (winner instanceof MachinePlayer) {
+            winner.receiveFeedback(1);
+            winner.refreshPath();
         }
         if (roles.some((e) => e == "human")) {
-            console.log(`Player${mover} wins!`);
+            const msgDiv = document.createElement("div");
+            if (loser == "human") {
+                msgDiv.innerHTML = "Computer wins!";
+            }
+            else {
+                msgDiv.innerHTML = "You wins!";
+            }
+            coinDesk === null || coinDesk === void 0 ? void 0 : coinDesk.appendChild(msgDiv);
         }
         gameOver = true;
         totalGame++;
@@ -81,26 +93,14 @@ function train(times, machines) {
     gameStartWithP2 = 0;
     p1WinTime = 0;
     p2WinTime = 0;
-    setupNewGame(true);
+    setupNewGame();
     while (!gameOver) {
-        if (mover == 1) {
-            makeMove(machines[0], "computer");
-            judge(machines);
-            if (totalGame == times)
-                return;
-            if (gameOver) {
-                setupNewGame(true);
-                if (mover == 1)
-                    continue;
-            }
-        }
-        makeMove(machines[1], "computer");
+        makeMove(machines[mover - 1], "computer");
         judge(machines);
         if (totalGame == times)
             return;
-        if (gameOver) {
-            setupNewGame(true);
-        }
+        if (gameOver)
+            setupNewGame();
     }
 }
 function printTrainResult() {
@@ -111,8 +111,16 @@ function printTrainResult() {
     console.log(computer2.table);
 }
 function humanStartPlay(roles) {
+    if (startBtn instanceof HTMLButtonElement && trainBtn instanceof HTMLButtonElement) {
+        startBtn.disabled = true;
+        trainBtn.disabled = true;
+        // remove event listener
+        startBtn.replaceWith(startBtn.cloneNode(true));
+        trainBtn.replaceWith(trainBtn.cloneNode(true));
+    }
     createChoiceBtn(roles);
-    setupNewGame(false);
+    setupNewGame();
+    createCoinDiv();
     notifyNextPlayer(roles);
 }
 function createChoiceBtn(roles) {
@@ -122,29 +130,54 @@ function createChoiceBtn(roles) {
             let btn = document.createElement("button");
             btn.className = "choice-btn";
             btn.id = `pick-${i + 1}-btn`;
-            btn.innerHTML = `${i + 1}`;
+            btn.innerHTML = `Pick ${i + 1}`;
+            btn.setAttribute("value", `${i + 1}`);
             btn.addEventListener("click", (e) => { humanMakeMove(e, roles); });
             choiceField.appendChild(btn);
         }
     }
 }
 function humanMakeMove(e, roles) {
-    if (e.currentTarget instanceof HTMLElement) {
-        if (parseInt(e.currentTarget.innerHTML) > numOfCoin) {
-            console.log("Unavailable Choice!");
-            console.log(Array(numOfCoin + 1).join("● "));
+    if (e.currentTarget instanceof HTMLElement && coinDesk != null && myChoiceMsg != null) {
+        const pickNumStr = e.currentTarget.getAttribute("value");
+        if (pickNumStr != null) {
+            const pickNum = parseInt(pickNumStr);
+            const msgDiv = document.createElement("div");
+            if (pickNum > numOfCoin) {
+                msgDiv.innerHTML = "Unavailable Choice!";
+            }
+            else {
+                for (let i = 0; i < pickNum; i++) {
+                    const movedCoin = coinDesk.childNodes[0];
+                    if (movedCoin instanceof HTMLElement) {
+                        coinDesk.removeChild(movedCoin);
+                    }
+                }
+                msgDiv.innerHTML = `You picked ${pickNum}`;
+                numOfCoin -= pickNum;
+                judge(roles);
+                if (!gameOver) {
+                    notifyNextPlayer(roles);
+                }
+                else if (choiceField != null) {
+                    choiceField.innerHTML = "";
+                }
+            }
+            while (myChoiceMsg.childNodes.length > 4) {
+                myChoiceMsg.removeChild(myChoiceMsg.childNodes[0]);
+            }
+            myChoiceMsg.appendChild(msgDiv);
         }
-        else {
-            console.log(`You picked ${e.currentTarget.innerHTML}`);
-            numOfCoin -= parseInt(e.currentTarget.innerHTML);
-            console.log(Array(numOfCoin + 1).join("● "));
-            judge(roles);
-            if (!gameOver) {
-                notifyNextPlayer(roles);
-            }
-            else if (choiceField != null) {
-                choiceField.innerHTML = "";
-            }
+    }
+}
+function createCoinDiv() {
+    if (coinDesk != null) {
+        coinDesk.innerHTML = "";
+        for (let i = 0; i < numOfCoin; i++) {
+            let coinDiv = document.createElement("div");
+            coinDiv.className = "coin";
+            coinDiv.innerHTML = "C";
+            coinDesk.appendChild(coinDiv);
         }
     }
 }
@@ -163,8 +196,17 @@ function notifyNextPlayer(roles) {
 }
 computer1 = new MachinePlayer(numOfCoin, maxPickable);
 computer2 = new MachinePlayer(numOfCoin, maxPickable);
-trainBtn === null || trainBtn === void 0 ? void 0 : trainBtn.addEventListener("click", () => {
-    train(1000, [computer1, computer2]);
-    printTrainResult();
-});
-startBtn === null || startBtn === void 0 ? void 0 : startBtn.addEventListener("click", () => { humanStartPlay(["human", computer1]); });
+if (trainBtn != null && startBtn != null && restartBtn != null) {
+    trainBtn.addEventListener("click", (e) => {
+        if (trainBtn instanceof HTMLButtonElement && coinDesk != null) {
+            trainBtn.disabled = true;
+            coinDesk.innerHTML = "Computer Trained!";
+            // remove this event listener
+            trainBtn.replaceWith(trainBtn.cloneNode(true));
+        }
+        train(1000, [computer1, computer2]);
+        printTrainResult();
+    });
+    startBtn.addEventListener("click", () => { humanStartPlay(["human", computer1]); });
+    restartBtn.addEventListener("click", () => location.reload());
+}

@@ -1,0 +1,121 @@
+:root {
+    --coinSize: 50px;
+}
+
+html {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    cursor: default;
+    user-select: none;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+}
+
+#main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 80%;
+    width: 100%;
+}
+
+#opponent-choice-msg,
+#my-choice-msg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: 15%;
+    max-height: 15%;
+}
+
+#coin-desk {
+    height: 70%;
+    font-size: 1.8rem;
+    font-weight: lighter;
+    color: #888;
+}
+
+#coin-desk {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--coinSize)+60px), 1fr));
+    justify-items: center;
+    width: 80%;
+}
+
+.coin {
+    width: var(--coinSize);
+    height: var(--coinSize);
+    background-color: #FFCE44;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #aaa;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+}
+
+#choice-field,
+#btn-field {
+    display: flex;
+    justify-content: center;
+    height: 10%;
+}
+
+.choice-btn {
+    margin: auto 20px;
+    border-radius: 100px;
+    padding: 5px 20px !important;
+    height: 40px;
+    border-style: none;
+    font-size: 1.2rem;
+    background-color: #FFF;
+}
+
+.choice-btn:hover {
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.game-btn {
+    color: #FFF;
+    width: 80px;
+    padding: 5px 0 !important;
+    border-radius: 5px;
+    border-style: none;
+    margin: auto 20px;
+}
+
+#train-btn {
+    background-color: #DE5246;
+}
+
+.game-btn:disabled {
+    background-color: #ccc !important;
+}
+
+#start-btn {
+    background-color: #4C8BF5;
+}
+
+#restart-btn {
+    background-color: #000;
+}
+
+.game-btn:hover:not(:disabled) {
+    opacity: 75%;
+}
+
+.game-btn:active {
+    opacity: 100%;
+}
