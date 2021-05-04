@@ -111,12 +111,13 @@ function printTrainResult() {
     console.log(computer2.table);
 }
 function humanStartPlay(roles) {
-    if (startBtn instanceof HTMLButtonElement && trainBtn instanceof HTMLButtonElement) {
+    if (startBtn instanceof HTMLButtonElement && trainBtn instanceof HTMLButtonElement && myChoiceMsg != null) {
         startBtn.disabled = true;
         trainBtn.disabled = true;
         // remove event listener
         startBtn.replaceWith(startBtn.cloneNode(true));
         trainBtn.replaceWith(trainBtn.cloneNode(true));
+        myChoiceMsg.innerHTML = "";
     }
     createChoiceBtn(roles);
     setupNewGame();
