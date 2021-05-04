@@ -11,6 +11,9 @@ export class MachinePlayer {
     get currentPick() {
         return this._currentPick;
     }
+    get table() {
+        return this._table;
+    }
     appendOnPath(coinRest, numTook) {
         this._path.push([coinRest, numTook]);
     }
@@ -42,7 +45,7 @@ export class MachinePlayer {
         let numTake;
         let maxScore;
         if (targetRow.every((i) => i == 0)) {
-            numTake = Math.floor(Math.random() * this._maxPickable);
+            numTake = Math.floor(Math.random() * this._maxPickable) + 1;
             maxScore = targetRow[numTake - 1];
         }
         else {

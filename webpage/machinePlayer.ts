@@ -16,6 +16,7 @@ export class MachinePlayer {
     private _currentPick: number;
     private _lr: number;
     private _discountRate: number;
+
     constructor(totalCoin: number, maxPickable: number) {
         this._totalCoin = totalCoin;
         this._maxPickable = maxPickable;
@@ -27,6 +28,9 @@ export class MachinePlayer {
     }
     public get currentPick(): number {
         return this._currentPick;
+    }
+    public get table(): number[][] {
+        return this._table;
     }
     private appendOnPath(coinRest: number, numTook: number): void {
         this._path.push([coinRest, numTook]);
@@ -58,7 +62,7 @@ export class MachinePlayer {
         let numTake: number;
         let maxScore: number;
         if (targetRow.every((i) => i == 0)) {
-            numTake = Math.floor(Math.random() * this._maxPickable);
+            numTake = Math.floor(Math.random() * this._maxPickable) + 1;
             maxScore = targetRow[numTake - 1];
         } else {
             maxScore = targetRow[0];
