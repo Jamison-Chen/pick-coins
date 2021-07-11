@@ -67,11 +67,15 @@ function judge(roles: (string | MachinePlayer)[]): void {
         // -1 * mover + 2 => input 1 output 1, input 2 output 0
         let winner = roles[-1 * mover + 2];
         if (loser instanceof MachinePlayer) {
+            // if (mover == 1) {
             loser.receiveFeedback(-1);
+            // }
             loser.refreshPath();
         }
         if (winner instanceof MachinePlayer) {
+            // if (mover == 1) {
             winner.receiveFeedback(1);
+            // }
             winner.refreshPath();
         }
 
@@ -162,7 +166,7 @@ function humanMakeMove(e: Event, roles: (string | MachinePlayer)[]): void {
                 numOfCoin -= pickNum;
                 judge(roles);
                 if (!gameOver) {
-                    notifyNextPlayer(roles);
+                    setTimeout(() => notifyNextPlayer(roles), 1000);
                 } else if (choiceField != null) {
                     choiceField.innerHTML = "";
                 }
@@ -195,8 +199,6 @@ function notifyNextPlayer(roles: (string | MachinePlayer)[]): void {
         if (gameOver && choiceField != null) {
             choiceField.innerHTML = "";
         }
-    } else {
-        console.log("Please pick a number.")
     }
 }
 
@@ -211,7 +213,7 @@ if (trainBtn != null && startBtn != null && restartBtn != null) {
             // remove this event listener
             trainBtn.replaceWith(trainBtn.cloneNode(true));
         }
-        train(1000, [computer1, computer2]);
+        train(1500, [computer1, computer2]);
         printTrainResult();
     });
     startBtn.addEventListener("click", () => { humanStartPlay(["human", computer1]) });
