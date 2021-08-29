@@ -1,10 +1,10 @@
-import machinePlayer as mp
+from machinePlayer import Player
 import random
 import time
 numberOfCoin = 10
 gameRunning = True
-computer1 = mp.Player(row=10, column=3)
-computer2 = mp.Player(row=10, column=3)
+computer1 = Player(row=10, column=3)
+computer2 = Player(row=10, column=3)
 p1Win = 0
 p2Win = 0
 totalGames = 0
@@ -16,7 +16,6 @@ p2Start = 0
 def newResult(pick=0, role="", p1=""):
     global numberOfCoin
     if role == "machine" and pick > numberOfCoin:
-        # print("Insufficient coins.... " + str(numberOfCoin) + " left")
         return False
     numberOfCoin -= pick
     if p1 == "human":
@@ -28,13 +27,9 @@ def player1MakeMove(role="machine"):
     global computer1, numberOfCoin
     if role == "machine":
         player1_pick = computer1.makeMove(numberOfCoin)[0]
-        # print("\nPlayer1 picks: " + str(player1_pick) + " coins")
-        # print(computer1.table)
         sufficient = newResult(pick=player1_pick, role=role, p1=role)
         while not sufficient:
             player1_pick_again = computer1.receiveFeedback(-2)[0]
-            # print("\nPlayer1 REpicks: " + str(player1_pick_again) + " coins")
-            # print(computer1.table)
             sufficient = newResult(pick=player1_pick_again, role=role, p1=role)
     elif role == "human":
         isDigit = False
@@ -59,13 +54,9 @@ def player2MakeMove(opponent=""):
         time.sleep(1)
         print("\n\t\t\t\t\t\t\t\t\tPlayer2 picks: " +
               str(player2_pick) + " coins")
-    # print(computer2.table)
     sufficient = newResult(pick=player2_pick, role="machine", p1=opponent)
     while not sufficient:
         player2_pick_again = computer2.receiveFeedback(-2)[0]
-        # print("\n\t\t\t\t\t\t\t\t\tPlayer2 REpicks: " +
-        #       str(player2_pick_again) + " coins")
-        # print(computer2.table)
         sufficient = newResult(pick=player2_pick_again,
                                role="machine", p1=opponent)
 
@@ -78,19 +69,15 @@ def judge(lastMover, p1="machine"):
     if numberOfCoin == 0:
         if p1 == "machine":
             if lastMover == 1:
-                # print("Player2 wins!!!!!!\n\n")
                 p2Win += 1
                 computer1.receiveFeedback(-1)
                 computer2.receiveFeedback(1)
             elif lastMover == 2:
-                # print("Player1 wins!!!!!!\n\n")
                 p1Win += 1
                 computer1.receiveFeedback(1)
                 computer2.receiveFeedback(-1)
             computer1.refreshPath()
             computer2.refreshPath()
-            # print(computer1.table)
-            # print(computer2.table)
         elif p1 == "human":
             if lastMover == 1:
                 print("Player2 wins!!!!!!\n\n")
@@ -101,7 +88,6 @@ def judge(lastMover, p1="machine"):
                 p1Win += 1
                 computer2.receiveFeedback(-1)
             computer2.refreshPath()
-            # print(computer2.table)
         gameRunning = False
         totalGames += 1
     mover = -1 * lastMover + 3  # input 2 -> output1; input 1 -> output 2

@@ -1,15 +1,11 @@
 export class MachinePlayer {
-    constructor(totalCoin, maxPickable) {
-        this._totalCoin = totalCoin;
+    constructor(initialNumOfCoin, maxPickable) {
         this._maxPickable = maxPickable;
-        this._table = Array(totalCoin).fill(null).map(() => Array(maxPickable).fill(0));
+        this._table = Array(initialNumOfCoin).fill(null).map(() => Array(maxPickable).fill(0));
         this._path = []; // [[rest coin(s), number took], ...]
-        this._currentPick = 0;
         this._lr = 0.5;
         this._discountRate = 0.5;
-    }
-    get currentPick() {
-        return this._currentPick;
+        this.winTimes = 0;
     }
     get table() {
         return this._table;
@@ -35,7 +31,7 @@ export class MachinePlayer {
             this.updateScoresOfARow(targetRowIdx + 1, true);
             this._table[targetRowIdx][targetColumnIdx] = -1 * Infinity;
             this._path.pop();
-            this.makeMove(targetRowIdx + 1);
+            return this.makeMove(targetRowIdx + 1);
         }
     }
     makeMove(restCoin) {
@@ -59,7 +55,7 @@ export class MachinePlayer {
             }
         }
         this.appendOnPath(restCoin, numTake);
-        this._currentPick = numTake;
+        return numTake;
     }
     updateScoresOfARow(restCoin, reverse) {
         const sign = reverse ? -1 : 1;
@@ -102,8 +98,13 @@ export class MachinePlayer {
             }
             return Math.max(...oneDArray) * this._discountRate;
         }
-        else {
+        else
             return 0;
-        }
     }
+}
+export class RandomPlayer extends MachinePlayer {
+    makeMove(restCoin) {
+        return Math.floor(Math.random() * Math.min(this._maxPickable, restCoin) + 1);
+    }
+    receiveFeedback(feedBack) { }
 }

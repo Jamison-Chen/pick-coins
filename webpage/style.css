@@ -28,22 +28,17 @@ body {
 
 #opponent-choice-msg,
 #my-choice-msg {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
     height: 15%;
     max-height: 15%;
 }
 
 #coin-desk {
     height: 70%;
-    font-size: 1.8rem;
-    font-weight: lighter;
-    color: #888;
 }
 
-#coin-desk {
+#coin-desk,
+#opponent-choice-msg,
+#my-choice-msg {
     display: grid;
     justify-content: center;
     align-items: center;
@@ -51,6 +46,9 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(calc(var(--coinSize)+60px), 1fr));
     justify-items: center;
     width: 80%;
+    font-size: 1.8rem;
+    font-weight: lighter;
+    color: #888;
 }
 
 .coin {
@@ -118,4 +116,20 @@ body {
 
 .game-btn:active {
     opacity: 100%;
+}
+
+#unavailable-choice {
+    position: fixed;
+    top: 47%;
+    height: 6%;
+    left: 42%;
+    width: 16%;
+    background-color: #DE5246;
+    color: #FFF;
+    font-size: large;
+    border-radius: 8px;
+    justify-content: center;
+    align-items: center;
+    transition-duration: 300ms;
+    display: none;
 }

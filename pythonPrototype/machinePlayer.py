@@ -2,8 +2,7 @@ import numpy as np
 import random
 
 
-class Player():
-
+class Player:
     def __init__(self, row, column):
         self.table = np.zeros((row, column))
         self.path = []  # [[rest coin(s), take number], ...]

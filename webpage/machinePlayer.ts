@@ -1,6 +1,5 @@
 export class MachinePlayer {
-    private _totalCoin: number;
-    private _maxPickable: number;
+    protected _maxPickable: number;
     private _table: number[][];
     // Below are how the table looks like...
     // -------------------------------------------------
@@ -13,21 +12,17 @@ export class MachinePlayer {
     // 10coinsRest
     // -------------------------------------------------
     private _path: number[][];
-    private _currentPick: number;
     private _lr: number;
     private _discountRate: number;
+    public winTimes: number;
 
-    constructor(totalCoin: number, maxPickable: number) {
-        this._totalCoin = totalCoin;
+    constructor(initialNumOfCoin: number, maxPickable: number) {
         this._maxPickable = maxPickable;
-        this._table = Array(totalCoin).fill(null).map(() => Array(maxPickable).fill(0));
+        this._table = Array(initialNumOfCoin).fill(null).map(() => Array(maxPickable).fill(0));
         this._path = []; // [[rest coin(s), number took], ...]
-        this._currentPick = 0;
         this._lr = 0.5;
         this._discountRate = 0.5;
-    }
-    public get currentPick(): number {
-        return this._currentPick;
+        this.winTimes = 0;
     }
     public get table(): number[][] {
         return this._table;
@@ -38,7 +33,7 @@ export class MachinePlayer {
     public refreshPath(): void {
         this._path = [];
     }
-    public receiveFeedback(feedBack: number): void {
+    public receiveFeedback(feedBack: 1 | -1 | -2): void | number {
         const targetRowIdx: number = this._path[this._path.length - 1][0] - 1;
         const targetColumnIdx: number = this._path[this._path.length - 1][1] - 1;
         if (feedBack == 1) {    // win
@@ -51,13 +46,12 @@ export class MachinePlayer {
             this.updateScoresOfARow(targetRowIdx + 1, true);
             this._table[targetRowIdx][targetColumnIdx] = -1 * Infinity;
             this._path.pop();
-            this.makeMove(targetRowIdx + 1);
+            return this.makeMove(targetRowIdx + 1);
         }
     }
-    public makeMove(restCoin: number) {
+    public makeMove(restCoin: number): number {
         // learn something before make choice
         this.updateScoresOfARow(restCoin, false);
-
         const targetRow: number[] = this._table[restCoin - 1];
         let numTake: number;
         let maxScore: number;
@@ -75,7 +69,7 @@ export class MachinePlayer {
             }
         }
         this.appendOnPath(restCoin, numTake)
-        this._currentPick = numTake;
+        return numTake;
     }
     private updateScoresOfARow(restCoin: number, reverse: boolean): void {
         const sign = reverse ? -1 : 1;
@@ -118,8 +112,13 @@ export class MachinePlayer {
                 for (let eachScore of eachRow) oneDArray.push(eachScore);
             }
             return Math.max(...oneDArray) * this._discountRate;
-        } else {
-            return 0;
-        }
+        } else return 0;
     }
+}
+
+export class RandomPlayer extends MachinePlayer {
+    public makeMove(restCoin: number): number {
+        return Math.floor(Math.random() * Math.min(this._maxPickable, restCoin) + 1);
+    }
+    public receiveFeedback(feedBack: number): void | number { }
 }
