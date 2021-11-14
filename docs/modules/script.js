@@ -28,7 +28,7 @@ function setupNewGame(playerList) {
     return {
         currentNumOfCoin: initialNumOfCoin,
         currentPlayer: playerList[-1 * startPlayerId + 2],
-        nextPlayer: playerList[startPlayerId - 1]
+        nextPlayer: playerList[startPlayerId - 1],
     };
 }
 function machinePlayerMakeMove(gameStatus) {
@@ -41,7 +41,8 @@ function machinePlayerMakeMove(gameStatus) {
                 numTook = repickNumOfCoin;
         }
         if (gameStatus.currentPlayer == "human") {
-            if (coinDesk instanceof HTMLElement && opponentChoiceMsg instanceof HTMLElement) {
+            if (coinDesk instanceof HTMLElement &&
+                opponentChoiceMsg instanceof HTMLElement) {
                 removeCoinDiv(coinDesk, numTook);
                 createAndPutCoinDiv(opponentChoiceMsg, numTook);
             }
@@ -49,11 +50,11 @@ function machinePlayerMakeMove(gameStatus) {
         return {
             currentNumOfCoin: gameStatus.currentNumOfCoin - numTook,
             currentPlayer: gameStatus.nextPlayer,
-            nextPlayer: gameStatus.currentPlayer
+            nextPlayer: gameStatus.currentPlayer,
         };
     }
     else {
-        throw (`Next player should be a MachinePlayer, not ${gameStatus.nextPlayer}`);
+        throw `Next player should be a MachinePlayer, not ${gameStatus.nextPlayer}`;
     }
 }
 function judge(gameStatus, playerList) {
@@ -99,13 +100,16 @@ function train(times, machines) {
 }
 function printTrainResult(playerList) {
     console.log(`Game start with P1: ${gameStartWithP1} / P2: ${gameStartWithP2}`);
-    console.log(`P1 winning rate: ${Math.round(playerList[0].winTimes / gamePlayed * 10000) / 100}%`);
-    console.log(`P2 winning rate: ${Math.round(playerList[1].winTimes / gamePlayed * 10000) / 100}%`);
+    console.log(`P1 winning rate: ${Math.round((playerList[0].winTimes / gamePlayed) * 10000) / 100}%`);
+    console.log(`P2 winning rate: ${Math.round((playerList[1].winTimes / gamePlayed) * 10000) / 100}%`);
     console.log(playerList[0].table);
     console.log(playerList[1].table);
 }
 function humanStartPlay(playerList) {
-    if (startBtn instanceof HTMLButtonElement && trainBtn instanceof HTMLButtonElement && myChoiceMsg instanceof HTMLElement && coinDesk instanceof HTMLElement) {
+    if (startBtn instanceof HTMLButtonElement &&
+        trainBtn instanceof HTMLButtonElement &&
+        myChoiceMsg instanceof HTMLElement &&
+        coinDesk instanceof HTMLElement) {
         startBtn.disabled = true;
         trainBtn.disabled = true;
         // remove whatever event listener from startBtn and trainBtn
@@ -147,7 +151,10 @@ function showUnavailableChoiceError() {
     }
 }
 function humanMakeMove(e, gameStatus, playerList) {
-    if (e.currentTarget instanceof HTMLElement && coinDesk instanceof HTMLElement && myChoiceMsg instanceof HTMLElement && choiceField instanceof HTMLElement) {
+    if (e.currentTarget instanceof HTMLElement &&
+        coinDesk instanceof HTMLElement &&
+        myChoiceMsg instanceof HTMLElement &&
+        choiceField instanceof HTMLElement) {
         const pickNumStr = e.currentTarget.getAttribute("value");
         if (pickNumStr != null) {
             const pickNum = parseInt(pickNumStr);
@@ -157,7 +164,7 @@ function humanMakeMove(e, gameStatus, playerList) {
                 let newGameStatus = {
                     currentNumOfCoin: gameStatus.currentNumOfCoin - pickNum,
                     currentPlayer: gameStatus.nextPlayer,
-                    nextPlayer: gameStatus.currentPlayer
+                    nextPlayer: gameStatus.currentPlayer,
                 };
                 removeCoinDiv(coinDesk, pickNum);
                 createAndPutCoinDiv(myChoiceMsg, pickNum);
@@ -213,7 +220,9 @@ function addHumanChoiceBtnsEventListener(gameStatus, playerList) {
         });
     }
 }
-if (trainBtn instanceof HTMLElement && startBtn instanceof HTMLElement && restartBtn instanceof HTMLElement) {
+if (trainBtn instanceof HTMLElement &&
+    startBtn instanceof HTMLElement &&
+    restartBtn instanceof HTMLElement) {
     let computer1 = new MachinePlayer(initialNumOfCoin, maxPickable);
     let computer2 = new RandomPlayer(initialNumOfCoin, maxPickable);
     trainBtn.addEventListener("click", (e) => {
@@ -223,7 +232,7 @@ if (trainBtn instanceof HTMLElement && startBtn instanceof HTMLElement && restar
             trainBtn.replaceWith(trainBtn.cloneNode(true));
         }
         let batchTrainTime = 500;
-        while (computer1.winTimes < batchTrainTime * .99) {
+        while (computer1.winTimes < batchTrainTime * 0.99) {
             computer1.winTimes = 0;
             computer2.winTimes = 0;
             train(batchTrainTime, [computer1, computer2]);

@@ -1,7 +1,9 @@
 export class MachinePlayer {
     constructor(initialNumOfCoin, maxPickable) {
         this._maxPickable = maxPickable;
-        this._table = Array(initialNumOfCoin).fill(null).map(() => Array(maxPickable).fill(0));
+        this._table = Array(initialNumOfCoin)
+            .fill(null)
+            .map(() => Array(maxPickable).fill(0));
         this._path = []; // [[rest coin(s), number took], ...]
         this._lr = 0.5;
         this._discountRate = 0.5;
@@ -19,13 +21,16 @@ export class MachinePlayer {
     receiveFeedback(feedBack) {
         const targetRowIdx = this._path[this._path.length - 1][0] - 1;
         const targetColumnIdx = this._path[this._path.length - 1][1] - 1;
-        if (feedBack == 1) { // win
+        if (feedBack == 1) {
+            // win
             this._table[targetRowIdx][targetColumnIdx] += 10;
         }
-        else if (feedBack == -1) { // lose
+        else if (feedBack == -1) {
+            // lose
             this._table[targetRowIdx][targetColumnIdx] -= 10;
         }
-        else if (feedBack == -2) { // if an invalid move has been made
+        else if (feedBack == -2) {
+            // if an invalid move has been made
             // make a deduction (reverse) of the values the latest invalid move added.
             // "targetRowIdx + 1" is the "latest number of coins rest"
             this.updateScoresOfARow(targetRowIdx + 1, true);
@@ -62,7 +67,8 @@ export class MachinePlayer {
         for (let i = 1; i <= this._maxPickable; i++) {
             if (i <= restCoin) {
                 // Q <- Q + lr * point
-                this._table[restCoin - 1][i - 1] += sign * this._lr * this.calcScore(restCoin, i);
+                this._table[restCoin - 1][i - 1] +=
+                    sign * this._lr * this.calcScore(restCoin, i);
             }
         }
     }
@@ -73,7 +79,7 @@ export class MachinePlayer {
         if (restCoinIfYouTakeN > 1) {
             let concernPart = [];
             for (let i = 0; i < Math.min(this._maxPickable, restCoinIfYouTakeN - 1); i++) {
-                concernPart.push(this._table[(restCoinIfYouTakeN - 1) - 1 - i]);
+                concernPart.push(this._table[restCoinIfYouTakeN - 1 - 1 - i]);
             }
             // If there exists any row that all numbers are negative,
             // it means that "take i" now will lead you to failure
