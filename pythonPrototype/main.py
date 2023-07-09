@@ -1,5 +1,6 @@
 import random
 import time
+from typing import Literal
 
 from machinePlayer import Player
 
@@ -14,8 +15,10 @@ mover = 1
 p1Start = 0
 p2Start = 0
 
+ROLE = Literal["human", "machine"]
 
-def newResult(pick=0, role="", p1=""):
+
+def newResult(pick: int, role: ROLE, p1: ROLE) -> bool:
     global numberOfCoin
     if role == "machine" and pick > numberOfCoin:
         return False
@@ -25,31 +28,31 @@ def newResult(pick=0, role="", p1=""):
     return True
 
 
-def player1MakeMove(role="machine"):
+def player1MakeMove(role: ROLE = "machine") -> None:
     global computer1, numberOfCoin
     if role == "machine":
         player1_pick = computer1.makeMove(numberOfCoin)[0]
         sufficient = newResult(pick=player1_pick, role=role, p1=role)
         while not sufficient:
-            player1_pick_again = computer1.receiveFeedback(-2)[0]
-            sufficient = newResult(pick=player1_pick_again, role=role, p1=role)
+            computer1.receiveFeedback(-2)
+            player1_pick = computer1.makeMove(numberOfCoin)[0]
+            sufficient = newResult(pick=player1_pick, role=role, p1=role)
     elif role == "human":
-        isDigit = False
-        while not isDigit:
+        player1_pick = None
+        while player1_pick is None:
             print("Please enter a number.")
-            inP = input()
-            if not inP.isdigit():
+            input_str = input()
+            if not input_str.isdigit():
                 continue
-            isDigit = True
-            player1_pick = int(inP)
+            player1_pick = int(input_str)
             if player1_pick > min(3, numberOfCoin) or player1_pick < 1:
-                print("You should pick 1~" + str(min(3, numberOfCoin)) + " coin(s)")
-                isDigit = False
-        print("\nPlayer1 picks: " + str(player1_pick) + " coins")
+                print(f"You should pick 1~{str(min(3, numberOfCoin))} coin(s)")
+                player1_pick = None
+        print(f"\nPlayer1 picks: {str(player1_pick)} coins")
         newResult(pick=player1_pick, role=role, p1=role)
 
 
-def player2MakeMove(opponent=""):
+def player2MakeMove(opponent: ROLE) -> None:
     global computer2, numberOfCoin
     player2_pick = computer2.makeMove(numberOfCoin)[0]
     if opponent == "human":
@@ -57,11 +60,12 @@ def player2MakeMove(opponent=""):
         print("\n\t\t\t\t\t\t\t\t\tPlayer2 picks: " + str(player2_pick) + " coins")
     sufficient = newResult(pick=player2_pick, role="machine", p1=opponent)
     while not sufficient:
-        player2_pick_again = computer2.receiveFeedback(-2)[0]
-        sufficient = newResult(pick=player2_pick_again, role="machine", p1=opponent)
+        computer2.receiveFeedback(-2)
+        player2_pick = computer2.makeMove(numberOfCoin)[0]
+        sufficient = newResult(pick=player2_pick, role="machine", p1=opponent)
 
 
-def judge(lastMover, p1="machine"):
+def judge(lastMover, p1: ROLE = "machine") -> None:
     global computer1, computer2, p1Win, p2Win, totalGames, gameRunning, numberOfCoin, mover
     if numberOfCoin == 0:
         if p1 == "machine":
@@ -90,7 +94,7 @@ def judge(lastMover, p1="machine"):
     mover = -1 * lastMover + 3  # input 2 -> output1; input 1 -> output 2
 
 
-def newGame(p1):
+def newGame(p1: ROLE) -> None:
     global numberOfCoin, gameRunning, mover, p1Start, p2Start
     gameRunning = True
     numberOfCoin = 10
@@ -103,7 +107,7 @@ def newGame(p1):
         p2Start += 1
 
 
-def play(trainTimes, p1=""):
+def play(trainTimes: int, p1: ROLE) -> None:
     global gameRunning, mover, totalGames
     totalGames = 0
     newGame(p1=p1)
@@ -125,11 +129,11 @@ def play(trainTimes, p1=""):
             newGame(p1=p1)
 
 
-def train(trainTimes):
+def train(trainTimes: int) -> None:
     play(trainTimes=trainTimes, p1="machine")
 
 
-def printTrainResult():
+def printTrainResult() -> None:
     global p1Win, p2Win, totalGames, p1Start, p2Start
     print("Game start with P1: " + str(p1Start) + " / P2: " + str(p2Start))
     print("P1 winning rate: " + str(p1Win / totalGames * 100) + "%")
@@ -138,6 +142,7 @@ def printTrainResult():
     print(computer2.table)
 
 
-train(1000)
-printTrainResult()
-play(trainTimes=1, p1="human")
+if __name__ == "__main__":
+    train(1000)
+    printTrainResult()
+    play(trainTimes=1, p1="human")

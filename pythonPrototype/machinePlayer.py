@@ -1,23 +1,24 @@
 import random
+from typing import Literal
 
 import numpy as np
 
 
 class Player:
-    def __init__(self, row, column):
+    def __init__(self, row, column) -> None:
         self.table = np.zeros((row, column))
-        self.path = []  # [[rest coin(s), take number], ...]
+        self.path: list[list[int]] = []  # [[rest coin(s), take number], ...]
         self.learningRate = 0.5
         self.discountRate = 0.5
 
-    def refreshPath(self):  # Refresh path only if the game is over.
+    def refreshPath(self) -> None:  # Refresh path only if the game is over.
         self.path.clear()
 
-    def pathAppend(self, theRestCoin, take_i):
+    def pathAppend(self, theRestCoin: int, take_i: int) -> None:
         self.path.append([theRestCoin, take_i])
 
     # Receive feedback either if the game is over or if insufficient coins to pick.
-    def receiveFeedback(self, winOrLose):
+    def receiveFeedback(self, winOrLose: Literal[1, -1, -2]) -> None:
         if winOrLose == 1:
             self.table[self.path[-1][0] - 1][self.path[-1][1] - 1] += 10
         elif winOrLose == -1:
@@ -28,12 +29,11 @@ class Player:
             self.givePoints(theRestCoin=lastPlace, reverse=True)
             self.table[lastPlace - 1][self.path[-1][1] - 1] -= float("inf")
             self.path.pop()
-            return self.makeMove(lastPlace)
 
     ##############################################################################
     # Key Logic Here!
-    def givePoints(self, theRestCoin, reverse=False):
-        def calculatePoint(theRestCoin, take_i):
+    def givePoints(self, theRestCoin: int, reverse: bool = False) -> None:
+        def calculatePoint(theRestCoin: int, take_i: int) -> float:
             zero = np.array([0, 0, 0])
             restCoinAfterYouTakeI = theRestCoin - take_i
             # If your opponent then take 1, the next time you will have restCoinAfterYouTakeI-1 conis rest.
@@ -72,7 +72,7 @@ class Player:
 
     ###############################################################################
 
-    def makeMove(self, theRestCoin):
+    def makeMove(self, theRestCoin: int) -> list[int]:
         # If you made an invalid move, and has been notified by the judge,
         # a deduction of the values in each blank is needed.
         # However, if the max number of coins you can pick < 4,
