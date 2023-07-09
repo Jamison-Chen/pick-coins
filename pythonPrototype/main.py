@@ -145,4 +145,4 @@ def printTrainResult() -> None:
 if __name__ == "__main__":
     train(1000)
     printTrainResult()
-    # play(trainTimes=1, p1="human")
+    play(trainTimes=1, p1="human")

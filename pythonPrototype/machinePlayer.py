@@ -19,14 +19,14 @@ class Player:
     # Receive feedback either when the game is over or when invalid move made.
     def receive_feedback(self, feedback: Literal[1, -1, -2]) -> None:
         if feedback == 1:  # win
-            self.table[self.__path[-1][0] - 1][self.__path[-1][1] - 1] += 10
+            self.table[self.__path[-1][0] - 1, self.__path[-1][1] - 1] += 10
         elif feedback == -1:  # lose
-            self.table[self.__path[-1][0] - 1][self.__path[-1][1] - 1] -= 10
+            self.table[self.__path[-1][0] - 1, self.__path[-1][1] - 1] -= 10
         elif feedback == -2:  # invalid move made
             prev_state, prev_num_took = self.__path.pop()
             # Revert the values that last invalid move added.
             self.__update_table(current_coin=prev_state, reverse=True)
-            self.table[prev_state - 1][prev_num_took - 1] -= float("inf")
+            self.table[prev_state - 1, prev_num_took - 1] -= float("inf")
 
     def __update_table(self, current_coin: int, reverse: bool = False) -> None:
         def get_score(take: int) -> float:
@@ -48,7 +48,7 @@ class Player:
 
         for i in range(1, min(self.__max_num_to_take, current_coin) + 1):
             # Q <- Q + lr * score
-            self.table[current_coin - 1][i - 1] += (
+            self.table[current_coin - 1, i - 1] += (
                 self.__learnint_rate * get_score(i) * (-1 if reverse else 1)
             )
 
