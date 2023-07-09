@@ -5,90 +5,73 @@ import numpy as np
 
 
 class Player:
-    def __init__(self, row, column) -> None:
-        self.table = np.zeros((row, column))
-        self.path: list[list[int]] = []  # [[rest coin(s), take number], ...]
-        self.learningRate = 0.5
-        self.discountRate = 0.5
+    def __init__(self, initial_coins: int, max_num_to_take: int) -> None:
+        self.__initial_coins = initial_coins
+        self.__max_num_to_take = max_num_to_take
+        self.table = np.zeros((self.__initial_coins, self.__max_num_to_take))
+        self.__path: list[tuple[int, int]] = []  # [(rest coin(s), take number), ...]
+        self.__learnint_rate = 0.5
+        self.__discount_rate = 0.5
 
-    def refreshPath(self) -> None:  # Refresh path only if the game is over.
-        self.path.clear()
+    def refresh_path(self) -> None:  # Refresh when game is over.
+        self.__path.clear()
 
-    def pathAppend(self, theRestCoin: int, take_i: int) -> None:
-        self.path.append([theRestCoin, take_i])
+    # Receive feedback either when the game is over or when invalid move made.
+    def receive_feedback(self, feedback: Literal[1, -1, -2]) -> None:
+        if feedback == 1:  # win
+            self.table[self.__path[-1][0] - 1][self.__path[-1][1] - 1] += 10
+        elif feedback == -1:  # lose
+            self.table[self.__path[-1][0] - 1][self.__path[-1][1] - 1] -= 10
+        elif feedback == -2:  # invalid move made
+            prev_state, prev_num_took = self.__path.pop()
+            # Revert the values that last invalid move added.
+            self.__update_table(current_coin=prev_state, reverse=True)
+            self.table[prev_state - 1][prev_num_took - 1] -= float("inf")
 
-    # Receive feedback either if the game is over or if insufficient coins to pick.
-    def receiveFeedback(self, winOrLose: Literal[1, -1, -2]) -> None:
-        if winOrLose == 1:
-            self.table[self.path[-1][0] - 1][self.path[-1][1] - 1] += 10
-        elif winOrLose == -1:
-            self.table[self.path[-1][0] - 1][self.path[-1][1] - 1] -= 10
-        elif winOrLose == -2:  # receive this if an invalid move has been made
-            lastPlace = self.path[-1][0]
-            # a deduction(reverse) of the values that last invalid move added.
-            self.givePoints(theRestCoin=lastPlace, reverse=True)
-            self.table[lastPlace - 1][self.path[-1][1] - 1] -= float("inf")
-            self.path.pop()
+    # Key Logic
+    def __update_table(self, current_coin: int, reverse: bool = False) -> None:
+        def get_score(take: int) -> float:
+            coin_you_left = current_coin - take
+            if coin_you_left in (0, 1):
+                return 0.0
+            elif coin_you_left > 1:
+                max_coin_your_opponent_left = coin_you_left - 1
+                next_possible_states_for_you = self.table[
+                    (max_coin_your_opponent_left - 1) :: -1, ::
+                ][: self.__max_num_to_take]
 
-    ##############################################################################
-    # Key Logic Here!
-    def givePoints(self, theRestCoin: int, reverse: bool = False) -> None:
-        def calculatePoint(theRestCoin: int, take_i: int) -> float:
-            zero = np.array([0, 0, 0])
-            restCoinAfterYouTakeI = theRestCoin - take_i
-            # If your opponent then take 1, the next time you will have restCoinAfterYouTakeI-1 conis rest.
-            # If your opponent then take 2, the next time you will have restCoinAfterYouTakeI-2 conis rest.
-            # If your opponent then take n, the next time you will have restCoinAfterYouTakeI-n conis rest.
-            if (restCoinAfterYouTakeI - 1) - 1 >= 0:
-                target = self.table[(restCoinAfterYouTakeI - 1) - 1 :: -1][:]
-                target = target[:3]
+                # Your opponent is always smart enough to push you to the worst
+                # situation.
                 # If there exists any row that all numbers are negative,
-                # it means that "take i" now will lead you to failure
-                # because your opponent is smart enough to push you to that situation.
-                for each in target:
-                    if (each < zero).all():
-                        return each.max() * self.discountRate
-
-                # If there exists any row that all numbers are zero
-                # (and no row is all-negative) it means that this choice
+                # it means that "take i" now will make you lose.
+                # If there exists any row that all numbers are 0
+                # (and no row is all-negative), it means that this choice
                 # will lead you to an unknown result.
-                for each in target:
-                    if (each == zero).all():
-                        return 0
-
-                return target.max() * self.discountRate
+                max_score_of_each_row = np.max(next_possible_states_for_you, axis=1)
+                return np.min(max_score_of_each_row) * self.__discount_rate
             else:
-                return 0
+                raise ValueError
 
-        plusOrMinus = -1 if reverse else 1
-        for i in range(1, 4):
-            if i <= theRestCoin:
-                # Q <- Q + lr*point
-                self.table[theRestCoin - 1][i - 1] += (
-                    self.learningRate
-                    * calculatePoint(theRestCoin=theRestCoin, take_i=i)
-                    * plusOrMinus
-                )
+        for i in range(1, min(self.__max_num_to_take, current_coin) + 1):
+            # Q <- Q + lr * score
+            self.table[current_coin - 1][i - 1] += (
+                self.__learnint_rate * get_score(i) * (-1 if reverse else 1)
+            )
 
-    ###############################################################################
-
-    def makeMove(self, theRestCoin: int) -> list[int]:
+    def makeMove(self, current_coin: int) -> int:
         # If you made an invalid move, and has been notified by the judge,
         # a deduction of the values in each blank is needed.
         # However, if the max number of coins you can pick < 4,
         # the situation described above can actually be ignored.
-        self.givePoints(theRestCoin)
-        max_val = self.table[theRestCoin - 1][0]
-        take_i = 0
-        thisRow = self.table[theRestCoin - 1][:]
-        if np.all(thisRow == thisRow[0]) and thisRow[0] == 0:
-            # print(thisRow)
-            take_i = random.randint(1, 3)
-            # take_i = random.randint(1,min(3,theRestCoin))
+        self.__update_table(current_coin)
+        current_row: np.ndarray = self.table[current_coin - 1]
+        if np.all(current_row == 0):
+            take = random.randint(1, self.__max_num_to_take)
         else:
-            for i in range(1, 4):
-                if thisRow[i - 1] >= max_val:
-                    max_val = thisRow[i - 1]
-                    take_i = i
-        self.pathAppend(theRestCoin=theRestCoin, take_i=take_i)
-        return [take_i, max_val]
+            take = int(np.argmax(current_row)) + 1
+        self.__path.append((current_coin, take))
+        return take
+
+
+if __name__ == "__main__":
+    ...

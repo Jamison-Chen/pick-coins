@@ -2,12 +2,13 @@ import random
 import time
 from typing import Literal
 
+import numpy as np
 from machinePlayer import Player
 
 numberOfCoin = 10
 gameRunning = True
-computer1 = Player(row=10, column=3)
-computer2 = Player(row=10, column=3)
+computer1 = Player(10, 3)
+computer2 = Player(10, 3)
 p1Win = 0
 p2Win = 0
 totalGames = 0
@@ -31,11 +32,11 @@ def newResult(pick: int, role: ROLE, p1: ROLE) -> bool:
 def player1MakeMove(role: ROLE = "machine") -> None:
     global computer1, numberOfCoin
     if role == "machine":
-        player1_pick = computer1.makeMove(numberOfCoin)[0]
+        player1_pick = computer1.makeMove(numberOfCoin)
         sufficient = newResult(pick=player1_pick, role=role, p1=role)
         while not sufficient:
-            computer1.receiveFeedback(-2)
-            player1_pick = computer1.makeMove(numberOfCoin)[0]
+            computer1.receive_feedback(-2)
+            player1_pick = computer1.makeMove(numberOfCoin)
             sufficient = newResult(pick=player1_pick, role=role, p1=role)
     elif role == "human":
         player1_pick = None
@@ -54,14 +55,14 @@ def player1MakeMove(role: ROLE = "machine") -> None:
 
 def player2MakeMove(opponent: ROLE) -> None:
     global computer2, numberOfCoin
-    player2_pick = computer2.makeMove(numberOfCoin)[0]
+    player2_pick = computer2.makeMove(numberOfCoin)
     if opponent == "human":
         time.sleep(1)
         print("\n\t\t\t\t\t\t\t\t\tPlayer2 picks: " + str(player2_pick) + " coins")
     sufficient = newResult(pick=player2_pick, role="machine", p1=opponent)
     while not sufficient:
-        computer2.receiveFeedback(-2)
-        player2_pick = computer2.makeMove(numberOfCoin)[0]
+        computer2.receive_feedback(-2)
+        player2_pick = computer2.makeMove(numberOfCoin)
         sufficient = newResult(pick=player2_pick, role="machine", p1=opponent)
 
 
@@ -71,24 +72,24 @@ def judge(lastMover, p1: ROLE = "machine") -> None:
         if p1 == "machine":
             if lastMover == 1:
                 p2Win += 1
-                computer1.receiveFeedback(-1)
-                computer2.receiveFeedback(1)
+                computer1.receive_feedback(-1)
+                computer2.receive_feedback(1)
             elif lastMover == 2:
                 p1Win += 1
-                computer1.receiveFeedback(1)
-                computer2.receiveFeedback(-1)
-            computer1.refreshPath()
-            computer2.refreshPath()
+                computer1.receive_feedback(1)
+                computer2.receive_feedback(-1)
+            computer1.refresh_path()
+            computer2.refresh_path()
         elif p1 == "human":
             if lastMover == 1:
                 print("Player2 wins!!!!!!\n\n")
                 p2Win += 1
-                computer2.receiveFeedback(1)
+                computer2.receive_feedback(1)
             elif lastMover == 2:
                 print("Player1 wins!!!!!!\n\n")
                 p1Win += 1
-                computer2.receiveFeedback(-1)
-            computer2.refreshPath()
+                computer2.receive_feedback(-1)
+            computer2.refresh_path()
         gameRunning = False
         totalGames += 1
     mover = -1 * lastMover + 3  # input 2 -> output1; input 1 -> output 2
@@ -145,4 +146,4 @@ def printTrainResult() -> None:
 if __name__ == "__main__":
     train(1000)
     printTrainResult()
-    play(trainTimes=1, p1="human")
+    # play(trainTimes=1, p1="human")
