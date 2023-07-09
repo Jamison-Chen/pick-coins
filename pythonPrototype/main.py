@@ -2,7 +2,6 @@ import random
 import time
 from typing import Literal
 
-import numpy as np
 from machinePlayer import Player
 
 numberOfCoin = 10

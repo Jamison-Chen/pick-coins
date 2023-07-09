@@ -28,7 +28,6 @@ class Player:
             self.__update_table(current_coin=prev_state, reverse=True)
             self.table[prev_state - 1][prev_num_took - 1] -= float("inf")
 
-    # Key Logic
     def __update_table(self, current_coin: int, reverse: bool = False) -> None:
         def get_score(take: int) -> float:
             coin_you_left = current_coin - take
@@ -41,12 +40,7 @@ class Player:
                 ][: self.__max_num_to_take]
 
                 # Your opponent is always smart enough to push you to the worst
-                # situation.
-                # If there exists any row that all numbers are negative,
-                # it means that "take i" now will make you lose.
-                # If there exists any row that all numbers are 0
-                # (and no row is all-negative), it means that this choice
-                # will lead you to an unknown result.
+                # or the most uncertain situation!
                 max_score_of_each_row = np.max(next_possible_states_for_you, axis=1)
                 return np.min(max_score_of_each_row) * self.__discount_rate
             else:
@@ -59,10 +53,6 @@ class Player:
             )
 
     def makeMove(self, current_coin: int) -> int:
-        # If you made an invalid move, and has been notified by the judge,
-        # a deduction of the values in each blank is needed.
-        # However, if the max number of coins you can pick < 4,
-        # the situation described above can actually be ignored.
         self.__update_table(current_coin)
         current_row: np.ndarray = self.table[current_coin - 1]
         if np.all(current_row == 0):
