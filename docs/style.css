@@ -43,7 +43,10 @@ body {
     justify-content: center;
     align-items: center;
     gap: 0.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(calc(var(--coinSize)+60px), 1fr));
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(calc(var(--coinSize)+60px), 1fr)
+    );
     justify-items: center;
     width: 80%;
     font-size: 1.8rem;
@@ -54,7 +57,7 @@ body {
 .coin {
     width: var(--coinSize);
     height: var(--coinSize);
-    background-color: #FFCE44;
+    background-color: #ffce44;
     border-radius: 100%;
     display: flex;
     justify-content: center;
@@ -77,7 +80,7 @@ body {
     height: 40px;
     border-style: none;
     font-size: 1.2rem;
-    background-color: #FFF;
+    background-color: #fff;
 }
 
 .choice-btn:hover {
@@ -86,7 +89,7 @@ body {
 }
 
 .game-btn {
-    color: #FFF;
+    color: #fff;
     width: 80px;
     padding: 5px 0 !important;
     border-radius: 5px;
@@ -95,7 +98,7 @@ body {
 }
 
 #train-btn {
-    background-color: #DE5246;
+    background-color: #de5246;
 }
 
 .game-btn:disabled {
@@ -103,7 +106,7 @@ body {
 }
 
 #start-btn {
-    background-color: #4C8BF5;
+    background-color: #4c8bf5;
 }
 
 #restart-btn {
@@ -124,8 +127,8 @@ body {
     height: 6%;
     left: 42%;
     width: 16%;
-    background-color: #DE5246;
-    color: #FFF;
+    background-color: #de5246;
+    color: #fff;
     font-size: large;
     border-radius: 8px;
     justify-content: center;

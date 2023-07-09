@@ -1,6 +1,8 @@
-from machinePlayer import Player
 import random
 import time
+
+from machinePlayer import Player
+
 numberOfCoin = 10
 gameRunning = True
 computer1 = Player(row=10, column=3)
@@ -19,7 +21,7 @@ def newResult(pick=0, role="", p1=""):
         return False
     numberOfCoin -= pick
     if p1 == "human":
-        print("\t\t\t\t"+("● " * numberOfCoin))
+        print("\t\t\t\t" + ("● " * numberOfCoin))
     return True
 
 
@@ -41,7 +43,7 @@ def player1MakeMove(role="machine"):
             isDigit = True
             player1_pick = int(inP)
             if player1_pick > min(3, numberOfCoin) or player1_pick < 1:
-                print("You should pick 1~"+str(min(3, numberOfCoin))+" coin(s)")
+                print("You should pick 1~" + str(min(3, numberOfCoin)) + " coin(s)")
                 isDigit = False
         print("\nPlayer1 picks: " + str(player1_pick) + " coins")
         newResult(pick=player1_pick, role=role, p1=role)
@@ -52,20 +54,15 @@ def player2MakeMove(opponent=""):
     player2_pick = computer2.makeMove(numberOfCoin)[0]
     if opponent == "human":
         time.sleep(1)
-        print("\n\t\t\t\t\t\t\t\t\tPlayer2 picks: " +
-              str(player2_pick) + " coins")
+        print("\n\t\t\t\t\t\t\t\t\tPlayer2 picks: " + str(player2_pick) + " coins")
     sufficient = newResult(pick=player2_pick, role="machine", p1=opponent)
     while not sufficient:
         player2_pick_again = computer2.receiveFeedback(-2)[0]
-        sufficient = newResult(pick=player2_pick_again,
-                               role="machine", p1=opponent)
+        sufficient = newResult(pick=player2_pick_again, role="machine", p1=opponent)
 
 
 def judge(lastMover, p1="machine"):
-    global computer1, computer2,\
-        p1Win, p2Win,\
-        totalGames, gameRunning,\
-        numberOfCoin, mover
+    global computer1, computer2, p1Win, p2Win, totalGames, gameRunning, numberOfCoin, mover
     if numberOfCoin == 0:
         if p1 == "machine":
             if lastMover == 1:
@@ -98,7 +95,7 @@ def newGame(p1):
     gameRunning = True
     numberOfCoin = 10
     if p1 == "human":
-        print("\t\t\t\t"+("● " * numberOfCoin))
+        print("\t\t\t\t" + ("● " * numberOfCoin))
     mover = random.randint(1, 2)
     if mover == 1:
         p1Start += 1
@@ -134,9 +131,9 @@ def train(trainTimes):
 
 def printTrainResult():
     global p1Win, p2Win, totalGames, p1Start, p2Start
-    print("Game start with P1: "+str(p1Start)+" / P2: "+str(p2Start))
-    print("P1 winning rate: " + str(p1Win/totalGames*100) + "%")
-    print("P2 winning rate: " + str(p2Win/totalGames*100) + "%")
+    print("Game start with P1: " + str(p1Start) + " / P2: " + str(p2Start))
+    print("P1 winning rate: " + str(p1Win / totalGames * 100) + "%")
+    print("P2 winning rate: " + str(p2Win / totalGames * 100) + "%")
     print(computer1.table)
     print(computer2.table)
 
