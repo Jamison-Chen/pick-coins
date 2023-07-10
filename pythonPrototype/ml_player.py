@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-class Player:
+class MLPlayer:
     def __init__(
         self,
         initial_coins: int,

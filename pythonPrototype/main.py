@@ -2,12 +2,12 @@ import random
 import time
 from typing import Literal
 
-from machinePlayer import Player
+from ml_player import MLPlayer
 
 num_of_coins = 10
 is_game_running = True
-computer1 = Player(10, 3)
-computer2 = Player(10, 3)
+computer1 = MLPlayer(10, 3)
+computer2 = MLPlayer(10, 3)
 p1_win = 0
 p2_win = 0
 total_games = 0
