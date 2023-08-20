@@ -1,13 +1,21 @@
 import { MachinePlayer, RandomPlayer } from "./machinePlayer.js";
-import { GameStatus } from "./gameStatus.js";
-const restartBtn = document.getElementById("restart-btn");
-const startBtn = document.getElementById("start-btn");
-const trainBtn = document.getElementById("train-btn");
-const choiceField = document.getElementById("choice-field");
-const coinDesk = document.getElementById("coin-desk");
-const opponentChoiceMsg = document.getElementById("opponent-choice-msg");
-const myChoiceMsg = document.getElementById("my-choice-msg");
-const unavailableChoiceDiv = document.getElementById("unavailable-choice");
+
+interface GameStatus {
+    currentNumOfCoin: number;
+    currentPlayer: MachinePlayer | "human";
+    nextPlayer: MachinePlayer | "human";
+}
+
+const restartBtn = document.getElementById("restart-btn") as HTMLButtonElement;
+const startBtn = document.getElementById("start-btn") as HTMLButtonElement;
+const trainBtn = document.getElementById("train-btn") as HTMLButtonElement;
+const choiceField: HTMLElement = document.getElementById("choice-field")!;
+const publicDesk: HTMLElement = document.getElementById("public-desk")!;
+const opponentDesk: HTMLElement = document.getElementById("opponent-desk")!;
+const myDesk: HTMLElement = document.getElementById("my-desk")!;
+const warningMessageDiv: HTMLElement =
+    document.getElementById("warning-message")!;
+const hintDiv: HTMLElement = document.getElementById("hint")!;
 
 let gameOver: boolean;
 let initialNumOfCoin = 10;
@@ -43,13 +51,8 @@ function machinePlayerMakeMove(gameStatus: GameStatus): GameStatus {
             if (typeof repickNumOfCoin == "number") numTook = repickNumOfCoin;
         }
         if (gameStatus.currentPlayer == "human") {
-            if (
-                coinDesk instanceof HTMLElement &&
-                opponentChoiceMsg instanceof HTMLElement
-            ) {
-                removeCoinDiv(coinDesk, numTook);
-                createAndPutCoinDiv(opponentChoiceMsg, numTook);
-            }
+            removeCoinDiv(publicDesk, numTook);
+            createAndPutCoinDiv(opponentDesk, numTook);
         }
         return {
             currentNumOfCoin: gameStatus.currentNumOfCoin - numTook,
@@ -78,10 +81,9 @@ function judge(
             winner.refreshPath();
         }
         if (playerList.some((e) => e == "human")) {
-            const msgDiv = document.createElement("div");
-            if (loser == "human") msgDiv.innerHTML = "Computer wins!";
-            else msgDiv.innerHTML = "You wins!";
-            coinDesk?.appendChild(msgDiv);
+            if (loser == "human") hintDiv.innerHTML = "Computer wins!";
+            else hintDiv.innerHTML = "You wins!";
+            hintDiv.style.display = "flex";
         }
         gameOver = true;
         gamePlayed++;
@@ -121,53 +123,35 @@ function printTrainResult(playerList: [MachinePlayer, MachinePlayer]): void {
 }
 
 function humanStartPlay(playerList: ("human" | MachinePlayer)[]): void {
-    if (
-        startBtn instanceof HTMLButtonElement &&
-        trainBtn instanceof HTMLButtonElement &&
-        myChoiceMsg instanceof HTMLElement &&
-        coinDesk instanceof HTMLElement
-    ) {
-        startBtn.disabled = true;
-        trainBtn.disabled = true;
-        // remove whatever event listener from startBtn and trainBtn
-        startBtn.replaceWith(startBtn.cloneNode(true));
-        trainBtn.replaceWith(trainBtn.cloneNode(true));
-        coinDesk.innerHTML = "";
-        myChoiceMsg.innerHTML = "";
-        let gameStatus: GameStatus = setupNewGame(playerList);
-        createChoiceBtn();
-        createAndPutCoinDiv(coinDesk, gameStatus.currentNumOfCoin);
-        notifyNextPlayer(gameStatus, playerList);
-    }
+    startBtn.disabled = true;
+    trainBtn.disabled = true;
+    // remove whatever event listener from startBtn and trainBtn
+    startBtn.replaceWith(startBtn.cloneNode(true));
+    trainBtn.replaceWith(trainBtn.cloneNode(true));
+    hintDiv.style.display = "none";
+    publicDesk.innerHTML = "";
+    myDesk.innerHTML = "";
+    let gameStatus: GameStatus = setupNewGame(playerList);
+    createChoiceBtn();
+    createAndPutCoinDiv(publicDesk, gameStatus.currentNumOfCoin);
+    notifyNextPlayer(gameStatus, playerList);
 }
 
 function createChoiceBtn(): void {
-    if (choiceField instanceof HTMLElement) {
-        choiceField.innerHTML = "";
-        for (let i = 0; i < maxPickable; i++) {
-            let btn = document.createElement("button");
-            btn.className = "choice-btn";
-            btn.id = `pick-${i + 1}-btn`;
-            btn.innerHTML = `Pick ${i + 1}`;
-            btn.setAttribute("value", `${i + 1}`);
-            choiceField.appendChild(btn);
-        }
+    choiceField.innerHTML = "";
+    for (let i = 0; i < maxPickable; i++) {
+        let btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.id = `pick-${i + 1}-btn`;
+        btn.innerHTML = `Pick ${i + 1}`;
+        btn.setAttribute("value", `${i + 1}`);
+        choiceField.appendChild(btn);
     }
 }
 
 function showUnavailableChoiceError(): void {
-    if (unavailableChoiceDiv !== null) {
-        unavailableChoiceDiv.style.display = "flex";
-        setTimeout(() => {
-            unavailableChoiceDiv.style.opacity = "100%";
-            setTimeout(() => {
-                unavailableChoiceDiv.style.opacity = "0%";
-                setTimeout(() => {
-                    unavailableChoiceDiv.style.display = "none";
-                }, 300);
-            }, 1000);
-        });
-    }
+    warningMessageDiv.style.display = "flex";
+    setTimeout(() => (warningMessageDiv.style.display = "none"), 1000);
 }
 
 function humanMakeMove(
@@ -175,12 +159,7 @@ function humanMakeMove(
     gameStatus: GameStatus,
     playerList: ("human" | MachinePlayer)[]
 ): void {
-    if (
-        e.currentTarget instanceof HTMLElement &&
-        coinDesk instanceof HTMLElement &&
-        myChoiceMsg instanceof HTMLElement &&
-        choiceField instanceof HTMLElement
-    ) {
+    if (e.currentTarget instanceof HTMLElement) {
         const pickNumStr = e.currentTarget.getAttribute("value");
         if (pickNumStr != null) {
             const pickNum = parseInt(pickNumStr);
@@ -192,8 +171,8 @@ function humanMakeMove(
                     currentPlayer: gameStatus.nextPlayer,
                     nextPlayer: gameStatus.currentPlayer,
                 };
-                removeCoinDiv(coinDesk, pickNum);
-                createAndPutCoinDiv(myChoiceMsg, pickNum);
+                removeCoinDiv(publicDesk, pickNum);
+                createAndPutCoinDiv(myDesk, pickNum);
                 removeHumanChoiceBtnsEventListener();
                 judge(newGameStatus, playerList);
                 if (!gameOver) {
@@ -216,9 +195,8 @@ function removeCoinDiv(targetDiv: HTMLElement, numToRemove: number): void {
 
 function createAndPutCoinDiv(divToPut: HTMLElement, numToCreate: number): void {
     for (let i = 0; i < numToCreate; i++) {
-        let coinDiv = document.createElement("div");
+        const coinDiv = document.createElement("div");
         coinDiv.className = "coin";
-        coinDiv.innerHTML = "C";
         divToPut.appendChild(coinDiv);
     }
 }
@@ -230,8 +208,7 @@ function notifyNextPlayer(
     if (gameStatus.nextPlayer instanceof MachinePlayer) {
         let newGameStatus = machinePlayerMakeMove(gameStatus);
         judge(newGameStatus, playerList);
-        if (gameOver && choiceField instanceof HTMLElement)
-            choiceField.innerHTML = "";
+        if (gameOver) choiceField.innerHTML = "";
         else addHumanChoiceBtnsEventListener(newGameStatus, playerList);
     } else addHumanChoiceBtnsEventListener(gameStatus, playerList);
 }
@@ -255,37 +232,21 @@ function addHumanChoiceBtnsEventListener(
     }
 }
 
-if (
-    trainBtn instanceof HTMLElement &&
-    startBtn instanceof HTMLElement &&
-    restartBtn instanceof HTMLElement
-) {
-    let computer1: MachinePlayer = new MachinePlayer(
-        initialNumOfCoin,
-        maxPickable
-    );
-    let computer2: MachinePlayer = new RandomPlayer(
-        initialNumOfCoin,
-        maxPickable
-    );
-    trainBtn.addEventListener("click", (e) => {
-        if (trainBtn instanceof HTMLButtonElement) {
-            trainBtn.disabled = true;
-            // remove whatever event listener from trainBtn
-            trainBtn.replaceWith(trainBtn.cloneNode(true));
-        }
-        let batchTrainTime = 500;
-        while (computer1.winTimes < batchTrainTime * 0.99) {
-            computer1.winTimes = 0;
-            computer2.winTimes = 0;
-            train(batchTrainTime, [computer1, computer2]);
-            printTrainResult([computer1, computer2]);
-        }
-        if (coinDesk instanceof HTMLElement)
-            coinDesk.innerHTML = "Computer Trained!";
-    });
-    startBtn.addEventListener("click", () =>
-        humanStartPlay(["human", computer1])
-    );
-    restartBtn.addEventListener("click", () => location.reload());
-}
+let computer1: MachinePlayer = new MachinePlayer(initialNumOfCoin, maxPickable);
+let computer2: MachinePlayer = new RandomPlayer(initialNumOfCoin, maxPickable);
+trainBtn.addEventListener("click", () => {
+    trainBtn.disabled = true;
+    // remove whatever event listener from trainBtn
+    trainBtn.replaceWith(trainBtn.cloneNode(true));
+
+    let batchTrainTime = 500;
+    while (computer1.winTimes < batchTrainTime * 0.99) {
+        computer1.winTimes = 0;
+        computer2.winTimes = 0;
+        train(batchTrainTime, [computer1, computer2]);
+        printTrainResult([computer1, computer2]);
+    }
+    hintDiv.innerHTML = "Computer Trained!";
+});
+startBtn.addEventListener("click", () => humanStartPlay(["human", computer1]));
+restartBtn.addEventListener("click", () => location.reload());

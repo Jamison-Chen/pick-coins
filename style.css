@@ -1,0 +1,201 @@
+:root {
+    --coinSize: 50px;
+    --red: #de5246;
+    --gold: #ffd700;
+    --blue: #4c8bf5;
+    box-sizing: border-box;
+    user-select: none;
+    cursor: default;
+}
+
+body {
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    margin: 0;
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+        sans-serif;
+}
+
+#main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 80%;
+    width: 100%;
+}
+
+#public-desk {
+    gap: 0.5rem;
+    margin: 50px 0;
+}
+
+#opponent-desk {
+    border-radius: 0 0 100% 100%;
+    box-shadow: 0px 4px 0px -1px #0005, 0px 4px 0px -1px #5a3828,
+        2px 4px 10px 0 #0005;
+}
+
+#my-desk {
+    border-radius: 100% 100% 0 0;
+}
+
+#opponent-desk,
+#my-desk {
+    height: 15%;
+    gap: 0;
+    background-color: #5a3828;
+}
+
+#opponent-desk > .coin,
+#my-desk > .coin {
+    transform: scale(0.5);
+}
+
+#public-desk,
+#opponent-desk,
+#my-desk {
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    grid-template-columns: repeat(auto-fit, var(--coinSize));
+    grid-template-rows: repeat(auto-fit, var(--coinSize));
+    width: 80%;
+    padding: 15px;
+}
+
+.coin {
+    position: relative;
+    width: var(--coinSize);
+    aspect-ratio: 1;
+    background-color: var(--gold);
+    border-radius: 100%;
+    box-shadow: 2px 4px 0px -1px #0001, 2px 4px 0px -1px var(--gold),
+        2px 4px 10px 0 #0005;
+}
+
+.coin::before {
+    content: "$";
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    border-radius: 100%;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.8rem;
+    font-family: "Courier New", Courier, monospace;
+    color: var(--gold);
+    text-shadow: 1px 1px #fff5, -2px -2px #0005;
+}
+
+#choice-field,
+#btn-field {
+    display: flex;
+    justify-content: center;
+    height: 10%;
+}
+
+.choice-btn {
+    margin: auto 20px;
+    border-radius: 100px;
+    padding: 5px 20px !important;
+    height: 40px;
+    border-style: none;
+    font-size: 1.2rem;
+    background-color: var(--blue);
+    color: #fff;
+    box-shadow: 0 5px 0px -1px #0002, 0 5px 0px -1px var(--blue),
+        0 5px 5px 0 #0005;
+    transition-duration: 150ms;
+}
+
+.choice-btn:hover {
+    opacity: 0.9;
+}
+
+.game-btn {
+    color: #fff;
+    width: 80px;
+    padding: 5px 0 !important;
+    border-radius: 5px;
+    border-style: none;
+    margin: auto 20px;
+}
+
+#train-btn {
+    background-color: var(--red);
+}
+
+.game-btn:disabled {
+    background-color: #ccc !important;
+}
+
+#start-btn {
+    background-color: var(--blue);
+}
+
+#restart-btn {
+    background-color: #000;
+}
+
+.game-btn:hover:not(:disabled) {
+    opacity: 75%;
+}
+
+.game-btn:active {
+    opacity: 100%;
+}
+
+#warning-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    display: none;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    background-color: var(--red);
+    color: #fff;
+    border-radius: 8px;
+    animation: fadeinout 1s ease;
+}
+
+@keyframes fadeinout {
+    from {
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+#hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    min-width: 300px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    line-height: 2rem;
+    font-size: 1.5rem;
+    padding: 20px 40px;
+    background-color: #0005;
+    color: #fff;
+    border-radius: 1px;
+    opacity: 0.8;
+}
